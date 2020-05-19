@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/google/go-github/v31/github"
 	"golang.org/x/oauth2"
@@ -62,8 +63,10 @@ func run(f Flags) error {
 	items := []Item{}
 
 	for _, cr := range res.CodeResults {
-		item := Item{Arg: cr.GetHTMLURL(), Subtitle: cr.GetPath(), Title: cr.GetName()}
-		items = append(items, item)
+		if strings.Contains(cr.GetPath(), "content") {
+			item := Item{Arg: cr.GetHTMLURL(), Subtitle: cr.GetPath(), Title: cr.GetName()}
+			items = append(items, item)
+		}
 	}
 
 	res2, _, err := client.Search.Code(ctx, fmt.Sprintf("%s repo:wayanjimmy/zettelkasten", f.Query), opts)
