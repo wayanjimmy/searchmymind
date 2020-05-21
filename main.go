@@ -24,14 +24,16 @@ type Item struct {
 }
 
 type Flags struct {
-	Query       string
-	AccessToken string
+	Query        string
+	AccessToken  string
+	PrivateNotes bool
 }
 
 func main() {
 	f := Flags{}
 	flag.StringVar(&f.Query, "query", "something", "something you want to search...")
 	flag.StringVar(&f.AccessToken, "token", "", "github access token")
+	flag.BoolVar(&f.PrivateNotes, "private-notes", false, "include search in private notes")
 	flag.Parse()
 
 	exitCode := 0
@@ -69,14 +71,16 @@ func run(f Flags) error {
 		}
 	}
 
-	res2, _, err := client.Search.Code(ctx, fmt.Sprintf("%s repo:wayanjimmy/zettelkasten", f.Query), opts)
-	if err != nil {
-		return err
-	}
+	if f.PrivateNotes {
+		res2, _, err := client.Search.Code(ctx, fmt.Sprintf("%s repo:wayanjimmy/zettelkasten", f.Query), opts)
+		if err != nil {
+			return err
+		}
 
-	for _, cr := range res2.CodeResults {
-		item := Item{Arg: cr.GetHTMLURL(), Subtitle: cr.GetPath(), Title: cr.GetName()}
-		items = append(items, item)
+		for _, cr := range res2.CodeResults {
+			item := Item{Arg: cr.GetHTMLURL(), Subtitle: cr.GetPath(), Title: cr.GetName()}
+			items = append(items, item)
+		}
 	}
 
 	sr := Items{
