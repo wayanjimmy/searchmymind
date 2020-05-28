@@ -27,13 +27,15 @@ type Flags struct {
 	Query        string
 	AccessToken  string
 	PrivateNotes bool
+	Server bool
 }
 
 func main() {
 	f := Flags{}
-	flag.StringVar(&f.Query, "query", "something", "something you want to search...")
-	flag.StringVar(&f.AccessToken, "token", "", "github access token")
+	flag.StringVar(&f.Query, "query", "something", "you know for search...")
+	flag.StringVar(&f.AccessToken, "token", "", "provide your github access token")
 	flag.BoolVar(&f.PrivateNotes, "private-notes", false, "include search in private notes")
+	flag.BoolVar(&f.Server, "server", false, "turn on the json api web server")
 	flag.Parse()
 
 	exitCode := 0
@@ -72,7 +74,7 @@ func run(f Flags) error {
 	}
 
 	if f.PrivateNotes {
-		res2, _, err := client.Search.Code(ctx, fmt.Sprintf("%s repo:wayanjimmy/zettelkasten", f.Query), opts)
+		res2, _, err := client.Search.Code(ctx, fmt.Sprintf("%s repo:wayanjimmy/zettlr", f.Query), opts)
 		if err != nil {
 			return err
 		}
@@ -92,7 +94,13 @@ func run(f Flags) error {
 		return err
 	}
 
-	fmt.Println(string(m))
+	if !f.Server {
+		fmt.Println(string(m))
+		return nil
+	}
+
+	s := newServer()
+	s.Run()
 
 	return nil
 }
