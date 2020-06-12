@@ -27,7 +27,7 @@ type Flags struct {
 	Query        string
 	AccessToken  string
 	PrivateNotes bool
-	Server bool
+	Server       bool
 }
 
 func main() {
@@ -68,7 +68,10 @@ func run(f Flags) error {
 
 	for _, cr := range res.CodeResults {
 		if strings.Contains(cr.GetPath(), "content") {
-			item := Item{Arg: cr.GetHTMLURL(), Subtitle: cr.GetPath(), Title: cr.GetName()}
+			path := strings.TrimLeft(cr.GetPath(), "content")
+			path = strings.TrimRight(path, ".md")
+
+			item := Item{Arg: fmt.Sprintf("https://notebook.wayanjimmy.xyz%s", path), Subtitle: cr.GetPath(), Title: cr.GetName()}
 			items = append(items, item)
 		}
 	}
